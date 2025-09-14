@@ -1,9 +1,12 @@
-import path from 'path';
-import fs from 'fs-extra';
-import { ProjectConfig, ResourceConfig } from '../types';
+import path from "path";
+import fs from "fs-extra";
+import { ProjectConfig, ResourceConfig } from "../types";
 
-export async function generateResourceFiles(config: ProjectConfig, projectPath: string): Promise<void> {
-  const srcPath = path.join(projectPath, 'src');
+export async function generateResourceFiles(
+  config: ProjectConfig,
+  projectPath: string
+): Promise<void> {
+  const srcPath = path.join(projectPath, "src");
 
   // Generate utils/registerResources file
   await generateRegisterResourcesUtil(config, srcPath);
@@ -13,13 +16,13 @@ export async function generateResourceFiles(config: ProjectConfig, projectPath: 
 
   // Generate initial user resource as example
   const userResourceConfig: ResourceConfig = {
-    name: 'user',
+    name: "user",
     generateTests: config.testing,
     withAuth: false,
     boilerplateLevel: config.boilerplateLevel,
-    includeValidation: config.includeValidation
+    includeValidation: config.includeValidation,
   };
-  
+
   await generateResource(config, userResourceConfig, srcPath);
 }
 
@@ -28,11 +31,11 @@ export async function generateResource(
   resourceConfig: ResourceConfig,
   basePath: string
 ): Promise<void> {
-  const resourcePath = path.join(basePath, 'resources', resourceConfig.name);
+  const resourcePath = path.join(basePath, "resources", resourceConfig.name);
   await fs.ensureDir(resourcePath);
 
-  const isTypeScript = projectConfig.language === 'ts';
-  const ext = isTypeScript ? '.ts' : '.js';
+  const isTypeScript = projectConfig.language === "ts";
+  const ext = isTypeScript ? ".ts" : ".js";
 
   // Generate resource files
   await fs.writeFile(
@@ -61,7 +64,7 @@ export async function generateResource(
   );
 
   // Generate model if database is enabled
-  if (projectConfig.database && projectConfig.database !== 'none') {
+  if (projectConfig.database && projectConfig.database !== "none") {
     await fs.writeFile(
       path.join(resourcePath, `model${ext}`),
       generateModelContent(projectConfig, resourceConfig)
@@ -77,16 +80,19 @@ export async function generateResource(
   }
 }
 
-async function generateRegisterResourcesUtil(config: ProjectConfig, srcPath: string): Promise<void> {
-  const isTypeScript = config.language === 'ts';
-  const ext = isTypeScript ? '.ts' : '.js';
-  const utilsPath = path.join(srcPath, 'utils');
-  
+async function generateRegisterResourcesUtil(
+  config: ProjectConfig,
+  srcPath: string
+): Promise<void> {
+  const isTypeScript = config.language === "ts";
+  const ext = isTypeScript ? ".ts" : ".js";
+  const utilsPath = path.join(srcPath, "utils");
+
   // Ensure utils directory exists
   await fs.ensureDir(utilsPath);
-  
-  let content = '';
-  
+
+  let content = "";
+
   if (isTypeScript) {
     content = `import { Application } from 'express';
 import fs from 'fs';
@@ -155,17 +161,20 @@ module.exports = { registerResources };`;
   return fs.writeFile(path.join(utilsPath, `registerResources${ext}`), content);
 }
 
-function generateMiddlewareFiles(config: ProjectConfig, srcPath: string): Promise<void[]> {
-  const isTypeScript = config.language === 'ts';
-  const ext = isTypeScript ? '.ts' : '.js';
-  const middlewarePath = path.join(srcPath, 'middleware');
+function generateMiddlewareFiles(
+  config: ProjectConfig,
+  srcPath: string
+): Promise<void[]> {
+  const isTypeScript = config.language === "ts";
+  const ext = isTypeScript ? ".ts" : ".js";
+  const middlewarePath = path.join(srcPath, "middleware");
 
   // Ensure middleware directory exists first
   return fs.ensureDir(middlewarePath).then(() => {
     const promises: Promise<void>[] = [];
 
     // Error handler middleware
-    let errorHandlerContent = '';
+    let errorHandlerContent = "";
     if (isTypeScript) {
       errorHandlerContent = `import { Request, Response, NextFunction } from 'express';
 
@@ -202,8 +211,8 @@ export const errorHandler = (
     ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
   });
 };`;
-  } else {
-    errorHandlerContent = `const errorHandler = (err, req, res, next) => {
+    } else {
+      errorHandlerContent = `const errorHandler = (err, req, res, next) => {
   let statusCode = err.statusCode || 500;
   let message = err.message || 'Internal Server Error';
 
@@ -227,17 +236,22 @@ export const errorHandler = (
 };
 
 module.exports = { errorHandler };`;
-  }
+    }
 
-  promises.push(fs.writeFile(path.join(middlewarePath, `errorHandler${ext}`), errorHandlerContent));
+    promises.push(
+      fs.writeFile(
+        path.join(middlewarePath, `errorHandler${ext}`),
+        errorHandlerContent
+      )
+    );
 
-  // Auth middleware if auth is enabled
-  if (config.auth && config.auth !== 'none') {
-    let authMiddlewareContent = '';
-    
-    if (config.auth === 'jwt') {
-      if (isTypeScript) {
-        authMiddlewareContent = `import { Request, Response, NextFunction } from 'express';
+    // Auth middleware if auth is enabled
+    if (config.auth && config.auth !== "none") {
+      let authMiddlewareContent = "";
+
+      if (config.auth === "jwt") {
+        if (isTypeScript) {
+          authMiddlewareContent = `import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
 interface AuthRequest extends Request {
@@ -262,8 +276,8 @@ export const authenticateToken = (req: AuthRequest, res: Response, next: NextFun
     next();
   });
 };`;
-      } else {
-        authMiddlewareContent = `const jwt = require('jsonwebtoken');
+        } else {
+          authMiddlewareContent = `const jwt = require('jsonwebtoken');
 
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
@@ -283,20 +297,29 @@ const authenticateToken = (req, res, next) => {
 };
 
 module.exports = { authenticateToken };`;
+        }
       }
-    }
 
-    promises.push(fs.writeFile(path.join(middlewarePath, `auth${ext}`), authMiddlewareContent));
-  }
+      promises.push(
+        fs.writeFile(
+          path.join(middlewarePath, `auth${ext}`),
+          authMiddlewareContent
+        )
+      );
+    }
 
     return Promise.all(promises);
   });
 }
 
-function generateControllerContent(projectConfig: ProjectConfig, resourceConfig: ResourceConfig): string {
-  const isTypeScript = projectConfig.language === 'ts';
+function generateControllerContent(
+  projectConfig: ProjectConfig,
+  resourceConfig: ResourceConfig
+): string {
+  const isTypeScript = projectConfig.language === "ts";
   const resourceName = resourceConfig.name;
-  const ResourceName = resourceName.charAt(0).toUpperCase() + resourceName.slice(1);
+  const ResourceName =
+    resourceName.charAt(0).toUpperCase() + resourceName.slice(1);
 
   if (isTypeScript) {
     return `import { Request, Response, NextFunction } from 'express';
@@ -499,15 +522,19 @@ module.exports = { ${ResourceName}Controller };`;
   }
 }
 
-function generateServiceContent(projectConfig: ProjectConfig, resourceConfig: ResourceConfig): string {
-  const isTypeScript = projectConfig.language === 'ts';
+function generateServiceContent(
+  projectConfig: ProjectConfig,
+  resourceConfig: ResourceConfig
+): string {
+  const isTypeScript = projectConfig.language === "ts";
   const resourceName = resourceConfig.name;
-  const ResourceName = resourceName.charAt(0).toUpperCase() + resourceName.slice(1);
+  const ResourceName =
+    resourceName.charAt(0).toUpperCase() + resourceName.slice(1);
 
-  let modelImport = '';
-  let serviceContent = '';
+  let modelImport = "";
+  let serviceContent = "";
 
-  if (projectConfig.database && projectConfig.database !== 'none') {
+  if (projectConfig.database && projectConfig.database !== "none") {
     if (isTypeScript) {
       modelImport = `import { ${ResourceName}Model } from './model';`;
       serviceContent = `export class ${ResourceName}Service {
@@ -643,21 +670,29 @@ module.exports = { ${ResourceName}Service };`;
 ${serviceContent}`;
 }
 
-function generateRoutesContent(projectConfig: ProjectConfig, resourceConfig: ResourceConfig): string {
-  const isTypeScript = projectConfig.language === 'ts';
+function generateRoutesContent(
+  projectConfig: ProjectConfig,
+  resourceConfig: ResourceConfig
+): string {
+  const isTypeScript = projectConfig.language === "ts";
   const resourceName = resourceConfig.name;
-  const ResourceName = resourceName.charAt(0).toUpperCase() + resourceName.slice(1);
+  const ResourceName =
+    resourceName.charAt(0).toUpperCase() + resourceName.slice(1);
 
-  let authImport = '';
-  let authMiddleware = '';
-  
-  if (resourceConfig.withAuth && projectConfig.auth && projectConfig.auth !== 'none') {
+  let authImport = "";
+  let authMiddleware = "";
+
+  if (
+    resourceConfig.withAuth &&
+    projectConfig.auth &&
+    projectConfig.auth !== "none"
+  ) {
     if (isTypeScript) {
       authImport = `import { authenticateToken } from '../../middleware/auth';`;
-      authMiddleware = ', authenticateToken';
+      authMiddleware = ", authenticateToken";
     } else {
       authImport = `const { authenticateToken } = require('../../middleware/auth');`;
-      authMiddleware = ', authenticateToken';
+      authMiddleware = ", authenticateToken";
     }
   }
 
@@ -694,10 +729,14 @@ module.exports = router;`;
   }
 }
 
-function generateValidationContent(projectConfig: ProjectConfig, resourceConfig: ResourceConfig): string {
-  const isTypeScript = projectConfig.language === 'ts';
+function generateValidationContent(
+  projectConfig: ProjectConfig,
+  resourceConfig: ResourceConfig
+): string {
+  const isTypeScript = projectConfig.language === "ts";
   const resourceName = resourceConfig.name;
-  const ResourceName = resourceName.charAt(0).toUpperCase() + resourceName.slice(1);
+  const ResourceName =
+    resourceName.charAt(0).toUpperCase() + resourceName.slice(1);
 
   if (isTypeScript) {
     return `import { body, validationResult } from 'express-validator';
@@ -757,8 +796,11 @@ module.exports = { validate${ResourceName} };`;
   }
 }
 
-function generateIndexContent(projectConfig: ProjectConfig, resourceConfig: ResourceConfig): string {
-  const isTypeScript = projectConfig.language === 'ts';
+function generateIndexContent(
+  projectConfig: ProjectConfig,
+  resourceConfig: ResourceConfig
+): string {
+  const isTypeScript = projectConfig.language === "ts";
   const resourceName = resourceConfig.name;
 
   if (isTypeScript) {
@@ -779,12 +821,16 @@ module.exports = register${resourceName.charAt(0).toUpperCase() + resourceName.s
   }
 }
 
-function generateModelContent(projectConfig: ProjectConfig, resourceConfig: ResourceConfig): string {
-  const isTypeScript = projectConfig.language === 'ts';
+function generateModelContent(
+  projectConfig: ProjectConfig,
+  resourceConfig: ResourceConfig
+): string {
+  const isTypeScript = projectConfig.language === "ts";
   const resourceName = resourceConfig.name;
-  const ResourceName = resourceName.charAt(0).toUpperCase() + resourceName.slice(1);
+  const ResourceName =
+    resourceName.charAt(0).toUpperCase() + resourceName.slice(1);
 
-  if (projectConfig.orm === 'mongoose') {
+  if (projectConfig.orm === "mongoose") {
     if (isTypeScript) {
       return `import { Schema, model, Document } from 'mongoose';
 
@@ -837,7 +883,7 @@ const ${ResourceName}Model = model('${ResourceName}', ${resourceName}Schema);
 
 module.exports = { ${ResourceName}Model };`;
     }
-  } else if (projectConfig.orm === 'prisma') {
+  } else if (projectConfig.orm === "prisma") {
     // For Prisma, we'll generate a schema file instead
     return `// Prisma model - Add this to your schema.prisma file:
 /*
@@ -854,13 +900,17 @@ model ${ResourceName} {
 export const ${ResourceName}Model = null;`;
   }
 
-  return '';
+  return "";
 }
 
-function generateTestContent(projectConfig: ProjectConfig, resourceConfig: ResourceConfig): string {
-  const isTypeScript = projectConfig.language === 'ts';
+function generateTestContent(
+  projectConfig: ProjectConfig,
+  resourceConfig: ResourceConfig
+): string {
+  const isTypeScript = projectConfig.language === "ts";
   const resourceName = resourceConfig.name;
-  const ResourceName = resourceName.charAt(0).toUpperCase() + resourceName.slice(1);
+  const ResourceName =
+    resourceName.charAt(0).toUpperCase() + resourceName.slice(1);
 
   if (isTypeScript) {
     return `import request from 'supertest';
