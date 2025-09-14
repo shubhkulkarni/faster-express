@@ -160,15 +160,14 @@ function generateMiddlewareFiles(config: ProjectConfig, srcPath: string): Promis
   const ext = isTypeScript ? '.ts' : '.js';
   const middlewarePath = path.join(srcPath, 'middleware');
 
-  const promises: Promise<void>[] = [];
-
   // Ensure middleware directory exists first
-  promises.push(fs.ensureDir(middlewarePath));
+  return fs.ensureDir(middlewarePath).then(() => {
+    const promises: Promise<void>[] = [];
 
-  // Error handler middleware
-  let errorHandlerContent = '';
-  if (isTypeScript) {
-    errorHandlerContent = `import { Request, Response, NextFunction } from 'express';
+    // Error handler middleware
+    let errorHandlerContent = '';
+    if (isTypeScript) {
+      errorHandlerContent = `import { Request, Response, NextFunction } from 'express';
 
 interface CustomError extends Error {
   statusCode?: number;
@@ -290,7 +289,8 @@ module.exports = { authenticateToken };`;
     promises.push(fs.writeFile(path.join(middlewarePath, `auth${ext}`), authMiddlewareContent));
   }
 
-  return Promise.all(promises);
+    return Promise.all(promises);
+  });
 }
 
 function generateControllerContent(projectConfig: ProjectConfig, resourceConfig: ResourceConfig): string {

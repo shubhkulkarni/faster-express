@@ -7,6 +7,9 @@ import { generateResourceFiles } from './resourceFiles';
 import { generateConfigFiles } from './configFiles';
 
 export async function generateProject(config: ProjectConfig, projectPath: string): Promise<void> {
+  // Create basic directory structure FIRST
+  await createDirectoryStructure(config, projectPath);
+
   // Generate package.json
   await generatePackageJson(config, projectPath);
 
@@ -20,9 +23,6 @@ export async function generateProject(config: ProjectConfig, projectPath: string
 
   // Generate configuration files
   await generateConfigFiles(config, projectPath);
-
-  // Create basic directory structure
-  await createDirectoryStructure(config, projectPath);
 }
 
 async function createDirectoryStructure(config: ProjectConfig, projectPath: string): Promise<void> {
