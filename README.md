@@ -202,6 +202,7 @@ The interactive resource creation now includes:
 **Swagger Integration:**
 
 If your project was created with `--with-swagger`, newly added resources will automatically include:
+
 - Complete OpenAPI 3.0 documentation for all CRUD endpoints
 - Request/response schemas and examples
 - Authentication requirements (if `--with-auth` is used)

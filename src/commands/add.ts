@@ -48,15 +48,15 @@ export async function addResource(resourceName: string, options: AddOptions) {
       packageJson.devDependencies?.jest || packageJson.dependencies?.jest;
 
     // Detect if Swagger is enabled in the project
-    const hasSwagger = 
-      packageJson.dependencies?.['swagger-ui-express'] ||
-      packageJson.devDependencies?.['swagger-ui-express'];
-    
-    const swaggerConfigPath = path.join(srcPath, 'swagger.ts');
-    const swaggerJsConfigPath = path.join(srcPath, 'swagger.js');
-    const hasSwaggerConfig = 
-      await fs.pathExists(swaggerConfigPath) || 
-      await fs.pathExists(swaggerJsConfigPath);
+    const hasSwagger =
+      packageJson.dependencies?.["swagger-ui-express"] ||
+      packageJson.devDependencies?.["swagger-ui-express"];
+
+    const swaggerConfigPath = path.join(srcPath, "swagger.ts");
+    const swaggerJsConfigPath = path.join(srcPath, "swagger.js");
+    const hasSwaggerConfig =
+      (await fs.pathExists(swaggerConfigPath)) ||
+      (await fs.pathExists(swaggerJsConfigPath));
 
     const projectConfig = {
       name: packageJson.name,
@@ -147,7 +147,7 @@ export async function addResource(resourceName: string, options: AddOptions) {
         `  Your ${resourceName} API is available at /api/${resourceName}s`
       )
     );
-    
+
     if (projectConfig.swagger.enabled) {
       console.log(
         chalk.cyan(
@@ -155,7 +155,7 @@ export async function addResource(resourceName: string, options: AddOptions) {
         )
       );
     }
-    
+
     console.log(
       chalk.cyan(
         `  Customize the model, validation, and business logic as needed`
