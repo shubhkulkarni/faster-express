@@ -47,6 +47,17 @@ export async function addResource(resourceName: string, options: AddOptions) {
     const hasJest =
       packageJson.devDependencies?.jest || packageJson.dependencies?.jest;
 
+    // Detect if Swagger is enabled in the project
+    const hasSwagger = 
+      packageJson.dependencies?.['swagger-ui-express'] ||
+      packageJson.devDependencies?.['swagger-ui-express'];
+    
+    const swaggerConfigPath = path.join(srcPath, 'swagger.ts');
+    const swaggerJsConfigPath = path.join(srcPath, 'swagger.js');
+    const hasSwaggerConfig = 
+      await fs.pathExists(swaggerConfigPath) || 
+      await fs.pathExists(swaggerJsConfigPath);
+
     const projectConfig = {
       name: packageJson.name,
       language: hasTsConfig ? ("ts" as const) : ("js" as const),
@@ -64,10 +75,10 @@ export async function addResource(resourceName: string, options: AddOptions) {
       boilerplateLevel: "full" as BoilerplateLevel,
       includeValidation: true,
       swagger: {
-        enabled: false,
-        title: "API Documentation",
+        enabled: hasSwagger && hasSwaggerConfig,
+        title: packageJson.name + " API",
         description: "API Documentation",
-        version: "1.0.0",
+        version: packageJson.version || "1.0.0",
         path: "/api-docs",
         theme: "default" as SwaggerTheme,
         generateExamples: true,
@@ -136,6 +147,15 @@ export async function addResource(resourceName: string, options: AddOptions) {
         `  Your ${resourceName} API is available at /api/${resourceName}s`
       )
     );
+    
+    if (projectConfig.swagger.enabled) {
+      console.log(
+        chalk.cyan(
+          `  API documentation updated automatically at ${projectConfig.swagger.path}`
+        )
+      );
+    }
+    
     console.log(
       chalk.cyan(
         `  Customize the model, validation, and business logic as needed`

@@ -197,6 +197,23 @@ The interactive resource creation now includes:
 - **Custom endpoints**: Add specialized endpoints beyond CRUD
 - **Validation options**: Choose whether to include input validation
 - **Progressive configuration**: Basic setup first, then "configure more?" for advanced options
+- **Automatic Swagger Documentation**: If your project has Swagger enabled, new resources automatically include API documentation
+
+**Swagger Integration:**
+
+If your project was created with `--with-swagger`, newly added resources will automatically include:
+- Complete OpenAPI 3.0 documentation for all CRUD endpoints
+- Request/response schemas and examples
+- Authentication requirements (if `--with-auth` is used)
+- Error response documentation
+- Interactive testing capability in Swagger UI
+
+```bash
+# Add resource with Swagger documentation (auto-detected)
+faster-express add user
+
+# The new endpoints will appear in your API documentation at /api-docs
+```
 
 ### `remove <resource-name>`
 
