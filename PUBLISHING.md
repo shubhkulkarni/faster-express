@@ -28,6 +28,7 @@
 You now have several ways to publish:
 
 #### Option A: Manual Release (Recommended)
+
 ```bash
 # Bump patch version and publish
 npm run release
@@ -37,6 +38,7 @@ npm version patch && git push origin main && git push origin --tags
 ```
 
 #### Option B: GitHub Actions Manual Trigger
+
 1. Go to "Actions" tab in GitHub
 2. Select "Version Bump and Publish" workflow
 3. Click "Run workflow"
@@ -44,11 +46,13 @@ npm version patch && git push origin main && git push origin --tags
 5. Choose whether to publish to NPM
 
 #### Option C: Automatic on Version Change
+
 - Edit `package.json` and bump the version
 - Commit and push to main branch
 - The "Auto Publish on Push" workflow will detect the version change and publish automatically
 
 #### Option D: Release Creation
+
 - Create a new release on GitHub with a tag like `v1.0.1`
 - The "Publish to NPM" workflow will automatically publish
 
@@ -84,17 +88,20 @@ npm publish          # Publish to NPM (after build)
 ## Troubleshooting
 
 ### NPM Login Issues
+
 ```bash
 npm login
 # Follow prompts to authenticate
 ```
 
 ### Permission Issues
+
 - Make sure you're logged in to NPM with the correct account
 - Verify you have publish permissions for the package name
 - Check if package name is available (first publish)
 
 ### GitHub Actions Issues
+
 - Verify NPM_TOKEN secret is set correctly
 - Check workflow logs in Actions tab
 - Ensure package.json version is valid semver

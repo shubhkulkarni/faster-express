@@ -2,11 +2,11 @@ name: Auto Publish on Push
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [main, master]
     paths-ignore:
-      - 'README.md'
-      - 'docs/**'
-      - '.github/**'
+      - "README.md"
+      - "docs/**"
+      - ".github/**"
 
 jobs:
   auto-publish:
@@ -21,8 +21,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          registry-url: 'https://registry.npmjs.org'
+          node-version: "18"
+          registry-url: "https://registry.npmjs.org"
 
       - name: Install dependencies
         run: npm ci

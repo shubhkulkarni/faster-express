@@ -1,10 +1,21 @@
-export type Language = 'ts' | 'js';
-export type PackageManager = 'npm' | 'yarn' | 'pnpm';
-export type ProjectStyle = 'resource' | 'layered';
-export type Database = 'mongodb' | 'postgres' | 'none';
-export type ORM = 'mongoose' | 'prisma' | 'sequelize' | 'typeorm';
-export type Auth = 'jwt' | 'passport' | 'none';
-export type BoilerplateLevel = 'minimal' | 'full' | 'signatures';
+export type Language = "ts" | "js";
+export type PackageManager = "npm" | "yarn" | "pnpm";
+export type ProjectStyle = "resource" | "layered";
+export type Database = "mongodb" | "postgres" | "none";
+export type ORM = "mongoose" | "prisma" | "sequelize" | "typeorm";
+export type Auth = "jwt" | "passport" | "none";
+export type BoilerplateLevel = "minimal" | "full" | "signatures";
+export type SwaggerTheme = "default" | "dark" | "material";
+
+export interface SwaggerConfig {
+  enabled: boolean;
+  title?: string;
+  description?: string;
+  version?: string;
+  path?: string;
+  theme?: SwaggerTheme;
+  generateExamples?: boolean;
+}
 
 export interface ProjectConfig {
   name: string;
@@ -22,6 +33,7 @@ export interface ProjectConfig {
   light: boolean;
   boilerplateLevel: BoilerplateLevel;
   includeValidation: boolean;
+  swagger: SwaggerConfig;
 }
 
 export interface ResourceConfig {
@@ -51,6 +63,9 @@ export interface CreateOptions {
   light?: boolean;
   boilerplate?: string;
   validation?: boolean;
+  withSwagger?: boolean;
+  swaggerTitle?: string;
+  swaggerPath?: string;
 }
 
 export interface AddOptions {
@@ -77,4 +92,6 @@ export interface TemplateContext {
   hasTesting: boolean;
   hasDocker: boolean;
   packageManager: string;
+  hasSwagger: boolean;
+  swagger?: SwaggerConfig;
 }

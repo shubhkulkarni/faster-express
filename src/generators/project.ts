@@ -5,6 +5,7 @@ import { generatePackageJson } from "./packageJson";
 import { generateAppFiles } from "./appFiles";
 import { generateResourceFiles } from "./resourceFiles";
 import { generateConfigFiles } from "./configFiles";
+import { generateSwaggerConfig } from "./swagger";
 
 export async function generateProject(
   config: ProjectConfig,
@@ -26,6 +27,11 @@ export async function generateProject(
 
   // Generate configuration files
   await generateConfigFiles(config, projectPath);
+
+  // Generate Swagger documentation if enabled
+  if (config.swagger.enabled) {
+    await generateSwaggerConfig(config, projectPath);
+  }
 }
 
 async function createDirectoryStructure(

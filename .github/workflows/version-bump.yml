@@ -4,16 +4,16 @@ on:
   workflow_dispatch:
     inputs:
       version_type:
-        description: 'Version bump type'
+        description: "Version bump type"
         required: true
-        default: 'patch'
+        default: "patch"
         type: choice
         options:
           - patch
           - minor
           - major
       publish:
-        description: 'Publish to NPM after version bump'
+        description: "Publish to NPM after version bump"
         required: true
         default: true
         type: boolean
@@ -30,8 +30,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          registry-url: 'https://registry.npmjs.org'
+          node-version: "18"
+          registry-url: "https://registry.npmjs.org"
 
       - name: Configure Git
         run: |
@@ -78,9 +78,9 @@ jobs:
           release_name: Release v${{ steps.version.outputs.new_version }}
           body: |
             ## Changes in v${{ steps.version.outputs.new_version }}
-            
+
             - Automated release via GitHub Actions
-            
+
             ## Installation
             ```bash
             npm install -g faster-express@${{ steps.version.outputs.new_version }}

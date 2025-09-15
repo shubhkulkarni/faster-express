@@ -1,36 +1,39 @@
-import path from 'path';
-import fs from 'fs-extra';
-import { ProjectConfig } from '../types';
+import path from "path";
+import fs from "fs-extra";
+import { ProjectConfig } from "../types";
 
-export async function generateAppFiles(config: ProjectConfig, projectPath: string): Promise<void> {
-  const srcPath = path.join(projectPath, 'src');
+export async function generateAppFiles(
+  config: ProjectConfig,
+  projectPath: string
+): Promise<void> {
+  const srcPath = path.join(projectPath, "src");
   await fs.ensureDir(srcPath);
 
   // Generate app file
   const appContent = generateAppContent(config);
-  const appFile = config.language === 'ts' ? 'app.ts' : 'app.js';
+  const appFile = config.language === "ts" ? "app.ts" : "app.js";
   await fs.writeFile(path.join(srcPath, appFile), appContent);
 
   // Generate server file
   const serverContent = generateServerContent(config);
-  const serverFile = config.language === 'ts' ? 'server.ts' : 'server.js';
+  const serverFile = config.language === "ts" ? "server.ts" : "server.js";
   await fs.writeFile(path.join(srcPath, serverFile), serverContent);
 
   // Generate environment file
   const envContent = generateEnvContent(config);
-  await fs.writeFile(path.join(projectPath, '.env'), envContent);
+  await fs.writeFile(path.join(projectPath, ".env"), envContent);
 
   // Generate env example
   const envExampleContent = generateEnvExampleContent(config);
-  await fs.writeFile(path.join(projectPath, '.env.example'), envExampleContent);
+  await fs.writeFile(path.join(projectPath, ".env.example"), envExampleContent);
 }
 
 function generateAppContent(config: ProjectConfig): string {
-  const isTypeScript = config.language === 'ts';
-  
-  let imports = '';
-  let middleware = '';
-  let routes = '';
+  const isTypeScript = config.language === "ts";
+
+  let imports = "";
+  let middleware = "";
+  let routes = "";
 
   if (isTypeScript) {
     imports = `import express from 'express';
@@ -38,15 +41,25 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { errorHandler } from './middleware/errorHandler';`;
+
+    if (config.swagger.enabled) {
+      imports += `
+import { SwaggerSetup } from './swagger';`;
+    }
   } else {
     imports = `const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const { errorHandler } = require('./middleware/errorHandler');`;
+
+    if (config.swagger.enabled) {
+      imports += `
+const { SwaggerSetup } = require('./swagger');`;
+    }
   }
 
-  if (config.style === 'resource') {
+  if (config.style === "resource") {
     if (isTypeScript) {
       imports += `
 import { registerResources } from './utils/registerResources';`;
@@ -71,7 +84,7 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));`;
 
-  if (config.style === 'resource') {
+  if (config.style === "resource") {
     routes = `
 // Auto-register all resources
 registerResources(app);`;
@@ -85,12 +98,29 @@ app.get('/', (req, res) => {
 
   const appFunction = `
 const app = express();
-${middleware}
+${middleware}${
+    config.swagger.enabled
+      ? `
+
+// Setup Swagger documentation
+const swaggerSetup = new SwaggerSetup(app);
+swaggerSetup.setup();`
+      : ""
+  }
 ${routes}
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
+  res.status(200).json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()${
+      config.swagger.enabled
+        ? `,
+    documentation: '${config.swagger.path}'`
+        : ""
+    }
+  });
 });
 
 // Error handling middleware (should be last)
@@ -103,10 +133,10 @@ ${appFunction}`;
 }
 
 function generateServerContent(config: ProjectConfig): string {
-  const isTypeScript = config.language === 'ts';
-  
-  let imports = '';
-  let dbConnection = '';
+  const isTypeScript = config.language === "ts";
+
+  let imports = "";
+  let dbConnection = "";
 
   if (isTypeScript) {
     imports = `import app from './app';
@@ -118,7 +148,7 @@ const dotenv = require('dotenv');`;
 
   // Database connection
   if (config.database && config.orm) {
-    if (config.orm === 'mongoose') {
+    if (config.orm === "mongoose") {
       if (isTypeScript) {
         imports += `
 import mongoose from 'mongoose';`;
@@ -126,13 +156,13 @@ import mongoose from 'mongoose';`;
         imports += `
 const mongoose = require('mongoose');`;
       }
-      
+
       dbConnection = `
 // Database connection
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/${config.name}')
   .then(() => console.log('Connected to MongoDB'))
   .catch((error) => console.error('MongoDB connection error:', error));`;
-    } else if (config.orm === 'prisma') {
+    } else if (config.orm === "prisma") {
       if (isTypeScript) {
         imports += `
 import { PrismaClient } from '@prisma/client';`;
@@ -140,7 +170,7 @@ import { PrismaClient } from '@prisma/client';`;
         imports += `
 const { PrismaClient } = require('@prisma/client');`;
       }
-      
+
       dbConnection = `
 // Database connection
 const prisma = new PrismaClient();
@@ -174,12 +204,12 @@ PORT=3000
 CORS_ORIGIN=http://localhost:3000`;
 
   if (config.database) {
-    if (config.database === 'mongodb') {
+    if (config.database === "mongodb") {
       content += `
 
 # MongoDB
 MONGODB_URI=mongodb://localhost:27017/${config.name}`;
-    } else if (config.database === 'postgres') {
+    } else if (config.database === "postgres") {
       content += `
 
 # PostgreSQL
@@ -187,7 +217,7 @@ DATABASE_URL=postgresql://username:password@localhost:5432/${config.name}`;
     }
   }
 
-  if (config.auth === 'jwt') {
+  if (config.auth === "jwt") {
     content += `
 
 # JWT
@@ -195,7 +225,7 @@ JWT_SECRET=your-super-secret-jwt-key
 JWT_EXPIRES_IN=7d`;
   }
 
-  if (config.auth === 'passport') {
+  if (config.auth === "passport") {
     content += `
 
 # Session
@@ -214,12 +244,12 @@ PORT=3000
 CORS_ORIGIN=http://localhost:3000`;
 
   if (config.database) {
-    if (config.database === 'mongodb') {
+    if (config.database === "mongodb") {
       content += `
 
 # MongoDB
 MONGODB_URI=mongodb://localhost:27017/your-database-name`;
-    } else if (config.database === 'postgres') {
+    } else if (config.database === "postgres") {
       content += `
 
 # PostgreSQL
@@ -227,7 +257,7 @@ DATABASE_URL=postgresql://username:password@localhost:5432/your-database-name`;
     }
   }
 
-  if (config.auth === 'jwt') {
+  if (config.auth === "jwt") {
     content += `
 
 # JWT
@@ -235,7 +265,7 @@ JWT_SECRET=your-super-secret-jwt-key
 JWT_EXPIRES_IN=7d`;
   }
 
-  if (config.auth === 'passport') {
+  if (config.auth === "passport") {
     content += `
 
 # Session

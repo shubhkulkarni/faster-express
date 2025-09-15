@@ -16,8 +16,9 @@
 🧪 **Testing included** - Jest and Supertest setup with optional validation  
 🐳 **Docker support** - Complete containerization setup  
 📝 **Code quality** - ESLint and Prettier configuration  
+📚 **API Documentation** - Swagger/OpenAPI 3.0 with interactive UI and utilities  
 ⚡ **Resource-based** - Nest.js-like modular architecture  
-🎯 **Smart Defaults** - Sensible defaults with option to customize everything  
+🎯 **Smart Defaults** - Sensible defaults with option to customize everything
 
 ## Installation
 
@@ -46,6 +47,7 @@ faster-express add user
 ```
 
 The interactive mode now features:
+
 - **Progressive disclosure**: Answer basic questions first, then choose "configure more?" for advanced options
 - **Smart defaults**: Sensible choices that work for most projects
 - **Lightweight mode**: Minimal setup for quick prototyping
@@ -66,7 +68,9 @@ faster-express create my-api \\
   --with-jest \\
   --with-docker \\
   --with-eslint \\
-  --with-prettier
+  --with-prettier \\
+  --with-swagger \\
+  --swagger-title "My API Documentation"
 
 # Add resource without prompts
 faster-express add post --no-tests
@@ -79,12 +83,14 @@ faster-express add post --no-tests
 Create a new Express project with your preferred configuration.
 
 **New Enhanced Options:**
+
 - `--light` - Create a lightweight project with minimal dependencies
 - `--boilerplate <level>` - Boilerplate level: `minimal`, `signatures`, or `full`. Default: `full`
 - `--no-validation` - Skip input validation setup
 - `--interactive` - Force interactive mode even with flags
 
 **Core Options:**
+
 - `--lang <language>` - Language: `ts` (TypeScript) or `js` (JavaScript). Default: `ts`
 - `--pkg-manager <manager>` - Package manager: `npm`, `yarn`, or `pnpm`. Default: `npm`
 - `--style <style>` - Project style: `resource` (Nest-like) or `layered`. Default: `resource`
@@ -98,6 +104,10 @@ Create a new Express project with your preferred configuration.
 - `--with-eslint` - Include ESLint configuration
 - `--with-prettier` - Include Prettier configuration
 - `--with-docker` - Include Docker configuration
+- `--with-swagger` - Include Swagger/OpenAPI documentation
+- `--swagger-title <title>` - API documentation title (requires --with-swagger)
+- `--swagger-path <path>` - Documentation endpoint path (requires --with-swagger). Default: `/api-docs`
+- `--swagger-theme <theme>` - UI theme: `default`, `material`, or `dark` (requires --with-swagger)
 - `--no-git` - Skip Git initialization
 
 **Examples:**
@@ -126,7 +136,18 @@ faster-express create my-api \\
   --with-jest \\
   --with-docker \\
   --with-eslint \\
-  --with-prettier
+  --with-prettier \\
+  --with-swagger \\
+  --swagger-title "My API" \\
+  --swagger-path "/docs"
+
+# API with Swagger documentation
+faster-express create my-api \\
+  --lang ts \\
+  --with-swagger \\
+  --swagger-title "My API Documentation" \\
+  --swagger-theme material \\
+  --swagger-path "/api-docs"
 
 # Lightweight with specific database
 faster-express create my-api --light --with-db --db mongodb
@@ -137,12 +158,14 @@ faster-express create my-api --light --with-db --db mongodb
 Add a new resource to an existing project with enhanced interactive configuration.
 
 **Enhanced Options:**
+
 - `--boilerplate <level>` - Boilerplate level: `minimal`, `signatures`, or `full`
 - `--no-validation` - Skip validation setup for this resource
 - `--endpoints <list>` - Custom endpoints (comma-separated): e.g., "activate,deactivate"
 - `--fields <list>` - Resource fields (comma-separated): e.g., "name:string,email:string"
 
 **Core Options:**
+
 - `--no-tests` - Skip test file generation
 - `--with-auth` - Include authentication middleware
 
@@ -169,6 +192,7 @@ faster-express add product \\
 ```
 
 The interactive resource creation now includes:
+
 - **Smart field detection**: Automatically suggests common fields for resource types
 - **Custom endpoints**: Add specialized endpoints beyond CRUD
 - **Validation options**: Choose whether to include input validation
@@ -207,11 +231,13 @@ faster-express create my-api
 ```
 
 **Step 1: Basic Setup**
+
 - Project language (TypeScript/JavaScript)
 - Package manager (npm/yarn/pnpm)
 - Include database? (yes/no)
 
 **Step 2: Configure More?**
+
 - The CLI asks if you want to configure additional options
 - If yes, you get advanced options for databases, authentication, testing, etc.
 - If no, sensible defaults are used
@@ -225,6 +251,7 @@ faster-express create my-api --light
 ```
 
 **Lightweight mode includes:**
+
 - Minimal dependencies
 - Basic Express setup
 - Essential middleware only
@@ -316,6 +343,7 @@ faster-express create my-api --with-db --db mongodb --orm mongoose
 ```
 
 Generates:
+
 - Mongoose connection setup
 - Schema-based models
 - Built-in validation
@@ -327,6 +355,7 @@ faster-express create my-api --with-db --db postgres --orm prisma
 ```
 
 Generates:
+
 - Prisma schema file
 - Type-safe database client
 - Migration support
@@ -338,6 +367,7 @@ faster-express create my-api --with-db --db postgres --orm sequelize
 ```
 
 Generates:
+
 - Sequelize models
 - Migration support
 - Connection pooling
@@ -349,6 +379,7 @@ faster-express create my-api --with-db --db postgres --orm typeorm
 ```
 
 Generates:
+
 - TypeORM entities
 - Decorator-based models
 - Advanced query capabilities
@@ -362,6 +393,7 @@ faster-express create my-api --with-auth --auth jwt
 ```
 
 Generates:
+
 - JWT middleware
 - Token generation utilities
 - Protected route examples
@@ -373,9 +405,185 @@ faster-express create my-api --with-auth --auth passport
 ```
 
 Generates:
+
 - Passport configuration
 - Local strategy setup
 - Session management
+
+## API Documentation with Swagger
+
+### Enabling Swagger Documentation
+
+```bash
+# Enable Swagger with default settings
+faster-express create my-api --with-swagger
+
+# Customize Swagger configuration
+faster-express create my-api \\
+  --with-swagger \\
+  --swagger-title "My API Documentation" \\
+  --swagger-path "/docs" \\
+  --swagger-theme material
+```
+
+### Interactive Configuration
+
+When using interactive mode, Swagger can be configured through progressive prompts:
+
+```bash
+faster-express create my-api
+# ... other questions ...
+? Would you like to include API documentation? Yes
+? What should be the API documentation title? My API
+? What path should serve the API documentation? /api-docs
+? Which Swagger UI theme would you prefer? Material - Modern and clean
+? Generate example request/response schemas in documentation? Yes
+```
+
+### Generated Swagger Files
+
+When Swagger is enabled, the following files are generated:
+
+```
+src/
+├── docs/
+│   ├── swagger.json           # OpenAPI 3.0 specification (JSON)
+│   └── swagger.yaml          # OpenAPI 3.0 specification (YAML)
+├── middleware/
+│   └── swagger.ts            # Swagger middleware setup
+├── utils/
+│   └── swagger.ts            # Documentation utilities
+└── swagger.ts                # Main Swagger configuration class
+```
+
+### Swagger Utilities
+
+The generated `utils/swagger.ts` provides helpful utilities for documenting your APIs:
+
+```typescript
+import {
+  createApiResponse,
+  createApiError,
+  createApiSchema,
+} from "../utils/swagger";
+
+// Create standardized API response documentation
+const userResponse = createApiResponse("User retrieved successfully", {
+  id: "string",
+  name: "string",
+  email: "string",
+});
+
+// Create error response documentation
+const notFoundError = createApiError(404, "User not found");
+
+// Create reusable schemas
+const createUserSchema = createApiSchema({
+  name: { type: "string", required: true },
+  email: { type: "string", format: "email", required: true },
+});
+```
+
+### Automatic Endpoint Documentation
+
+Generated controllers include comprehensive Swagger/JSDoc comments:
+
+```typescript
+/**
+ * @swagger
+ * /api/users:
+ *   get:
+ *     summary: Get all users
+ *     tags: [Users]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number
+ *     responses:
+ *       200:
+ *         description: Users retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/User'
+ *                 pagination:
+ *                   $ref: '#/components/schemas/Pagination'
+ */
+export const getAllUsers = async (req: Request, res: Response) => {
+  // Implementation...
+};
+```
+
+### Swagger Themes
+
+Choose from multiple UI themes:
+
+- **`default`** - Clean and professional Swagger UI
+- **`material`** - Modern Material Design inspired theme
+- **`dark`** - Dark mode theme for better readability
+
+### Accessing Documentation
+
+Once your project is running, access the API documentation at:
+
+- Default: `http://localhost:3000/api-docs`
+- Custom path: `http://localhost:3000/your-custom-path`
+
+The documentation includes:
+
+- Interactive API explorer
+- Request/response examples
+- Schema definitions
+- Authentication requirements
+- Error responses
+
+### Complete Swagger Documentation Guide
+
+For comprehensive examples and advanced usage, see the [Swagger Documentation Guide](./SWAGGER_GUIDE.md).
+
+### Adding Documentation to Existing Endpoints
+
+Use the swagger utilities to easily document custom endpoints:
+
+```typescript
+import {
+  createApiResponse,
+  createApiError,
+  createPaginationSchema,
+  createValidationErrorSchema,
+} from "../utils/swagger";
+
+/**
+ * @swagger
+ * /api/users/{id}/activate:
+ *   patch:
+ *     summary: Activate a user account
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID
+ *     responses:
+ *       200:
+ *         $ref: '#/components/responses/UserActivated'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ */
+export const activateUser = async (req: Request, res: Response) => {
+  // Your implementation
+};
+```
 
 ## Testing
 
@@ -384,6 +592,7 @@ faster-express create my-api --with-jest
 ```
 
 Generates:
+
 - Jest configuration
 - Supertest integration
 - Complete test suites for each resource
@@ -396,6 +605,7 @@ faster-express create my-api --with-docker
 ```
 
 Generates:
+
 - Multi-stage Dockerfile
 - docker-compose.yml with services
 - Database containers (if database enabled)
@@ -508,16 +718,16 @@ Generated `package.json` includes these scripts:
 ```json
 {
   "scripts": {
-    "build": "tsc",                    // TypeScript compilation
-    "start": "node dist/server.js",   // Production start
-    "dev": "ts-node src/server.ts",   // Development with hot reload
-    "test": "jest",                    // Run tests
-    "test:watch": "jest --watch",      // Watch mode testing
+    "build": "tsc", // TypeScript compilation
+    "start": "node dist/server.js", // Production start
+    "dev": "ts-node src/server.ts", // Development with hot reload
+    "test": "jest", // Run tests
+    "test:watch": "jest --watch", // Watch mode testing
     "test:coverage": "jest --coverage", // Coverage report
-    "lint": "eslint src/**/*.ts",      // Code linting
+    "lint": "eslint src/**/*.ts", // Code linting
     "lint:fix": "eslint src/**/*.ts --fix", // Auto-fix linting
     "format": "prettier --write src/**/*.ts", // Code formatting
-    "db:generate": "prisma generate",  // Generate Prisma client
+    "db:generate": "prisma generate", // Generate Prisma client
     "db:migrate": "prisma migrate dev" // Run database migrations
   }
 }
@@ -540,25 +750,32 @@ faster-express add user --endpoints "activate,deactivate"
 # Minimal boilerplate
 faster-express create my-api --boilerplate minimal
 
+# API with Swagger documentation
+faster-express create my-api --with-swagger --swagger-theme material
+
 # Full featured setup
-faster-express create my-api --with-db --db postgres --orm prisma --with-auth --with-jest
+faster-express create my-api --with-db --db postgres --orm prisma --with-auth --with-jest --with-swagger
 ```
 
 ### CLI Flags Quick Reference
 
-| Flag | Description | Options | Default |
-|------|-------------|---------|---------|
-| `--light` | Lightweight project | - | `false` |
-| `--boilerplate` | Code generation level | `minimal`, `signatures`, `full` | `full` |
-| `--no-validation` | Skip validation setup | - | `false` |
-| `--lang` | Project language | `ts`, `js` | `ts` |
-| `--pkg-manager` | Package manager | `npm`, `yarn`, `pnpm` | `npm` |
-| `--db` | Database type | `mongodb`, `postgres` | - |
-| `--orm` | ORM/ODM | `mongoose`, `prisma`, `sequelize`, `typeorm` | - |
-| `--auth` | Authentication | `jwt`, `passport` | - |
-| `--with-jest` | Include testing | - | `false` |
-| `--with-docker` | Include Docker | - | `false` |
-| `--no-git` | Skip Git init | - | `false` |
+| Flag              | Description           | Options                                      | Default      |
+| ----------------- | --------------------- | -------------------------------------------- | ------------ |
+| `--light`         | Lightweight project   | -                                            | `false`      |
+| `--boilerplate`   | Code generation level | `minimal`, `signatures`, `full`              | `full`       |
+| `--no-validation` | Skip validation setup | -                                            | `false`      |
+| `--lang`          | Project language      | `ts`, `js`                                   | `ts`         |
+| `--pkg-manager`   | Package manager       | `npm`, `yarn`, `pnpm`                        | `npm`        |
+| `--db`            | Database type         | `mongodb`, `postgres`                        | -            |
+| `--orm`           | ORM/ODM               | `mongoose`, `prisma`, `sequelize`, `typeorm` | -            |
+| `--auth`          | Authentication        | `jwt`, `passport`                            | -            |
+| `--with-jest`     | Include testing       | -                                            | `false`      |
+| `--with-docker`   | Include Docker        | -                                            | `false`      |
+| `--with-swagger`  | Include API docs      | -                                            | `false`      |
+| `--swagger-title` | API docs title        | string                                       | Project name |
+| `--swagger-path`  | Docs endpoint         | string                                       | `/api-docs`  |
+| `--swagger-theme` | UI theme              | `default`, `material`, `dark`                | `default`    |
+| `--no-git`        | Skip Git init         | -                                            | `false`      |
 
 ## Contributing
 

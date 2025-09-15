@@ -323,7 +323,12 @@ function generateControllerContent(
 
   if (isTypeScript) {
     return `import { Request, Response, NextFunction } from 'express';
-import { ${ResourceName}Service } from './service';
+import { ${ResourceName}Service } from './service';${
+      projectConfig.swagger.enabled
+        ? `
+import { generateCRUDDocs } from '../../utils/swagger';`
+        : ""
+    }
 
 export class ${ResourceName}Controller {
   private ${resourceName}Service: ${ResourceName}Service;
@@ -332,6 +337,33 @@ export class ${ResourceName}Controller {
     this.${resourceName}Service = new ${ResourceName}Service();
   }
 
+  /**
+   * Get all ${resourceName}s
+   * GET /api/${resourceName}s${
+     projectConfig.swagger.enabled
+       ? `
+   * @swagger
+   * /api/${resourceName}s:
+   *   get:
+   *     tags: [${ResourceName}]
+   *     summary: Get all ${resourceName}s
+   *     responses:
+   *       200:
+   *         description: List of ${resourceName}s
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                 data:
+   *                   type: array
+   *                   items:
+   *                     $ref: '#/components/schemas/${ResourceName}'`
+       : ""
+   }
+   */
   public getAll = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const ${resourceName}s = await this.${resourceName}Service.findAll();
@@ -344,6 +376,30 @@ export class ${ResourceName}Controller {
     }
   };
 
+  /**
+   * Get ${resourceName} by ID
+   * GET /api/${resourceName}s/:id${
+     projectConfig.swagger.enabled
+       ? `
+   * @swagger
+   * /api/${resourceName}s/{id}:
+   *   get:
+   *     tags: [${ResourceName}]
+   *     summary: Get ${resourceName} by ID
+   *     parameters:
+   *       - name: id
+   *         in: path
+   *         required: true
+   *         schema:
+   *           type: string
+   *     responses:
+   *       200:
+   *         description: ${ResourceName} details
+   *       404:
+   *         description: ${ResourceName} not found`
+       : ""
+   }
+   */
   public getById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
@@ -366,6 +422,28 @@ export class ${ResourceName}Controller {
     }
   };
 
+  /**
+   * Create new ${resourceName}
+   * POST /api/${resourceName}s${
+     projectConfig.swagger.enabled
+       ? `
+   * @swagger
+   * /api/${resourceName}s:
+   *   post:
+   *     tags: [${ResourceName}]
+   *     summary: Create new ${resourceName}
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/${ResourceName}Input'
+   *     responses:
+   *       201:
+   *         description: ${ResourceName} created successfully`
+       : ""
+   }
+   */
   public create = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const ${resourceName} = await this.${resourceName}Service.create(req.body);
@@ -378,6 +456,36 @@ export class ${ResourceName}Controller {
     }
   };
 
+  /**
+   * Update ${resourceName}
+   * PUT /api/${resourceName}s/:id${
+     projectConfig.swagger.enabled
+       ? `
+   * @swagger
+   * /api/${resourceName}s/{id}:
+   *   put:
+   *     tags: [${ResourceName}]
+   *     summary: Update ${resourceName}
+   *     parameters:
+   *       - name: id
+   *         in: path
+   *         required: true
+   *         schema:
+   *           type: string
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/${ResourceName}Input'
+   *     responses:
+   *       200:
+   *         description: ${ResourceName} updated successfully
+   *       404:
+   *         description: ${ResourceName} not found`
+       : ""
+   }
+   */
   public update = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
@@ -400,6 +508,30 @@ export class ${ResourceName}Controller {
     }
   };
 
+  /**
+   * Delete ${resourceName}
+   * DELETE /api/${resourceName}s/:id${
+     projectConfig.swagger.enabled
+       ? `
+   * @swagger
+   * /api/${resourceName}s/{id}:
+   *   delete:
+   *     tags: [${ResourceName}]
+   *     summary: Delete ${resourceName}
+   *     parameters:
+   *       - name: id
+   *         in: path
+   *         required: true
+   *         schema:
+   *           type: string
+   *     responses:
+   *       200:
+   *         description: ${ResourceName} deleted successfully
+   *       404:
+   *         description: ${ResourceName} not found`
+       : ""
+   }
+   */
   public delete = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;

@@ -1,12 +1,15 @@
-import path from 'path';
-import fs from 'fs-extra';
-import { ProjectConfig } from '../types';
+import path from "path";
+import fs from "fs-extra";
+import { ProjectConfig } from "../types";
 
-export async function generateConfigFiles(config: ProjectConfig, projectPath: string): Promise<void> {
+export async function generateConfigFiles(
+  config: ProjectConfig,
+  projectPath: string
+): Promise<void> {
   const promises: Promise<void>[] = [];
 
   // TypeScript configuration
-  if (config.language === 'ts') {
+  if (config.language === "ts") {
     promises.push(generateTsConfig(projectPath));
   }
 
@@ -31,7 +34,7 @@ export async function generateConfigFiles(config: ProjectConfig, projectPath: st
   }
 
   // Prisma schema
-  if (config.orm === 'prisma') {
+  if (config.orm === "prisma") {
     promises.push(generatePrismaSchema(config, projectPath));
   }
 
@@ -44,11 +47,11 @@ export async function generateConfigFiles(config: ProjectConfig, projectPath: st
 async function generateTsConfig(projectPath: string): Promise<void> {
   const tsConfig = {
     compilerOptions: {
-      target: 'ES2020',
-      module: 'commonjs',
-      lib: ['ES2020'],
-      outDir: './dist',
-      rootDir: './src',
+      target: "ES2020",
+      module: "commonjs",
+      lib: ["ES2020"],
+      outDir: "./dist",
+      rootDir: "./src",
       strict: true,
       esModuleInterop: true,
       skipLibCheck: true,
@@ -58,97 +61,109 @@ async function generateTsConfig(projectPath: string): Promise<void> {
       sourceMap: true,
       removeComments: true,
       resolveJsonModule: true,
-      types: ['node', 'jest'],
-      moduleResolution: 'node',
+      types: ["node", "jest"],
+      moduleResolution: "node",
       allowSyntheticDefaultImports: true,
       experimentalDecorators: true,
-      emitDecoratorMetadata: true
+      emitDecoratorMetadata: true,
     },
-    include: ['src/**/*'],
-    exclude: ['node_modules', 'dist', '**/*.test.ts']
+    include: ["src/**/*"],
+    exclude: ["node_modules", "dist", "**/*.test.ts"],
   };
 
-  await fs.writeJson(path.join(projectPath, 'tsconfig.json'), tsConfig, { spaces: 2 });
+  await fs.writeJson(path.join(projectPath, "tsconfig.json"), tsConfig, {
+    spaces: 2,
+  });
 }
 
-async function generateJestConfig(config: ProjectConfig, projectPath: string): Promise<void> {
+async function generateJestConfig(
+  config: ProjectConfig,
+  projectPath: string
+): Promise<void> {
   let jestConfig: any = {
-    testEnvironment: 'node',
+    testEnvironment: "node",
     collectCoverageFrom: [
-      'src/**/*.{js,ts}',
-      '!src/**/*.test.{js,ts}',
-      '!src/**/*.spec.{js,ts}'
+      "src/**/*.{js,ts}",
+      "!src/**/*.test.{js,ts}",
+      "!src/**/*.spec.{js,ts}",
     ],
-    coverageDirectory: 'coverage',
-    coverageReporters: ['text', 'lcov', 'html'],
-    testMatch: [
-      '**/__tests__/**/*.(js|ts)',
-      '**/*.(test|spec).(js|ts)'
-    ]
+    coverageDirectory: "coverage",
+    coverageReporters: ["text", "lcov", "html"],
+    testMatch: ["**/__tests__/**/*.(js|ts)", "**/*.(test|spec).(js|ts)"],
   };
 
-  if (config.language === 'ts') {
-    jestConfig.preset = 'ts-jest';
+  if (config.language === "ts") {
+    jestConfig.preset = "ts-jest";
     jestConfig.transform = {
-      '^.+\\.ts$': 'ts-jest'
+      "^.+\\.ts$": "ts-jest",
     };
-    jestConfig.moduleFileExtensions = ['ts', 'js', 'json'];
+    jestConfig.moduleFileExtensions = ["ts", "js", "json"];
   }
 
-  await fs.writeJson(path.join(projectPath, 'jest.config.json'), jestConfig, { spaces: 2 });
+  await fs.writeJson(path.join(projectPath, "jest.config.json"), jestConfig, {
+    spaces: 2,
+  });
 }
 
-async function generateEslintConfig(config: ProjectConfig, projectPath: string): Promise<void> {
+async function generateEslintConfig(
+  config: ProjectConfig,
+  projectPath: string
+): Promise<void> {
   let eslintConfig: any = {
     env: {
       node: true,
-      es2021: true
+      es2021: true,
     },
-    extends: ['eslint:recommended'],
+    extends: ["eslint:recommended"],
     parserOptions: {
       ecmaVersion: 12,
-      sourceType: 'module'
+      sourceType: "module",
     },
     rules: {
-      'no-console': 'warn',
-      'no-unused-vars': 'error',
-      'prefer-const': 'error'
-    }
+      "no-console": "warn",
+      "no-unused-vars": "error",
+      "prefer-const": "error",
+    },
   };
 
-  if (config.language === 'ts') {
-    eslintConfig.parser = '@typescript-eslint/parser';
-    eslintConfig.extends.push('@typescript-eslint/recommended');
-    eslintConfig.plugins = ['@typescript-eslint'];
-    eslintConfig.rules['@typescript-eslint/no-unused-vars'] = 'error';
-    eslintConfig.rules['@typescript-eslint/explicit-function-return-type'] = 'warn';
+  if (config.language === "ts") {
+    eslintConfig.parser = "@typescript-eslint/parser";
+    eslintConfig.extends.push("@typescript-eslint/recommended");
+    eslintConfig.plugins = ["@typescript-eslint"];
+    eslintConfig.rules["@typescript-eslint/no-unused-vars"] = "error";
+    eslintConfig.rules["@typescript-eslint/explicit-function-return-type"] =
+      "warn";
   }
 
   if (config.prettier) {
-    eslintConfig.extends.push('prettier');
+    eslintConfig.extends.push("prettier");
     eslintConfig.plugins = eslintConfig.plugins || [];
-    eslintConfig.plugins.push('prettier');
-    eslintConfig.rules['prettier/prettier'] = 'error';
+    eslintConfig.plugins.push("prettier");
+    eslintConfig.rules["prettier/prettier"] = "error";
   }
 
   if (config.testing) {
     eslintConfig.env.jest = true;
   }
 
-  await fs.writeJson(path.join(projectPath, '.eslintrc.json'), eslintConfig, { spaces: 2 });
+  await fs.writeJson(path.join(projectPath, ".eslintrc.json"), eslintConfig, {
+    spaces: 2,
+  });
 }
 
 async function generatePrettierConfig(projectPath: string): Promise<void> {
   const prettierConfig = {
     semi: true,
-    trailingComma: 'es5',
+    trailingComma: "es5",
     singleQuote: true,
     printWidth: 80,
     tabWidth: 2,
-    useTabs: false
+    useTabs: false,
   };
 
-  await fs.writeJson(path.join(projectPath, '.prettierrc'), prettierConfig, { spaces: 2 });
+  await fs.writeJson(path.join(projectPath, ".prettierrc"), prettierConfig, {
+    spaces: 2,
+  });
 
   // Create .prettierignore
   const prettierIgnore = `node_modules/
@@ -160,14 +175,17 @@ coverage/
 .env.production
 `;
 
-  await fs.writeFile(path.join(projectPath, '.prettierignore'), prettierIgnore);
+  await fs.writeFile(path.join(projectPath, ".prettierignore"), prettierIgnore);
 }
 
-async function generateDockerFiles(config: ProjectConfig, projectPath: string): Promise<void> {
+async function generateDockerFiles(
+  config: ProjectConfig,
+  projectPath: string
+): Promise<void> {
   // Dockerfile
-  let dockerfile = '';
-  
-  if (config.language === 'ts') {
+  let dockerfile = "";
+
+  if (config.language === "ts") {
     dockerfile = `# Build stage
 FROM node:18-alpine AS builder
 
@@ -237,7 +255,7 @@ EXPOSE 3000
 CMD ["node", "src/server.js"]`;
   }
 
-  await fs.writeFile(path.join(projectPath, 'Dockerfile'), dockerfile);
+  await fs.writeFile(path.join(projectPath, "Dockerfile"), dockerfile);
 
   // docker-compose.yml
   let dockerCompose = `version: '3.8'
@@ -254,7 +272,7 @@ services:
       - /app/node_modules
     depends_on:`;
 
-  if (config.database === 'mongodb') {
+  if (config.database === "mongodb") {
     dockerCompose += `
       - mongodb
 
@@ -269,7 +287,7 @@ services:
 
 volumes:
   mongodb_data:`;
-  } else if (config.database === 'postgres') {
+  } else if (config.database === "postgres") {
     dockerCompose += `
       - postgres
 
@@ -296,7 +314,10 @@ volumes:
       - "6379:6379"`;
   }
 
-  await fs.writeFile(path.join(projectPath, 'docker-compose.yml'), dockerCompose);
+  await fs.writeFile(
+    path.join(projectPath, "docker-compose.yml"),
+    dockerCompose
+  );
 
   // .dockerignore
   const dockerignore = `node_modules
@@ -314,11 +335,14 @@ coverage
 .idea
 `;
 
-  await fs.writeFile(path.join(projectPath, '.dockerignore'), dockerignore);
+  await fs.writeFile(path.join(projectPath, ".dockerignore"), dockerignore);
 }
 
-async function generatePrismaSchema(config: ProjectConfig, projectPath: string): Promise<void> {
-  const prismaPath = path.join(projectPath, 'prisma');
+async function generatePrismaSchema(
+  config: ProjectConfig,
+  projectPath: string
+): Promise<void> {
+  const prismaPath = path.join(projectPath, "prisma");
   await fs.ensureDir(prismaPath);
 
   let schema = `// This is your Prisma schema file,
@@ -330,7 +354,7 @@ generator client {
 
 datasource db {`;
 
-  if (config.database === 'postgres') {
+  if (config.database === "postgres") {
     schema += `
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -343,7 +367,7 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }`;
-  } else if (config.database === 'mongodb') {
+  } else if (config.database === "mongodb") {
     schema += `
   provider = "mongodb"
   url      = env("DATABASE_URL")
@@ -358,7 +382,7 @@ model User {
 }`;
   }
 
-  await fs.writeFile(path.join(prismaPath, 'schema.prisma'), schema);
+  await fs.writeFile(path.join(prismaPath, "schema.prisma"), schema);
 }
 
 async function generateGitignore(projectPath: string): Promise<void> {
@@ -475,5 +499,5 @@ logs
 prisma/migrations/
 `;
 
-  await fs.writeFile(path.join(projectPath, '.gitignore'), gitignore);
+  await fs.writeFile(path.join(projectPath, ".gitignore"), gitignore);
 }
