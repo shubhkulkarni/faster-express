@@ -1,6 +1,6 @@
 {
   "name": "faster-express",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "A production-ready CLI for scaffolding resource-based Express applications with interactive prompts",
   "main": "dist/index.js",
   "bin": {
